@@ -1,0 +1,38 @@
+.table-title {
+    background: #299be4;
+    color: #fff;
+    padding: 16px 30px;
+    border-radius: 3px 3px 0 0;
+    text-align: center;
+}
+
+.table-title .btn {
+    float: right;
+    min-width: 50px;
+    outline: none !important;
+    margin-top: 10px;
+    margin-left: 10px;
+    text-align: center;
+}
+
+.table thead th {
+    background-color: #4CAF50 !important;
+    color: #fff;
+    border: 0;
+    text-align: center;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.table > tbody > tr > td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+.pa-bottom {
+    padding-bottom: 0!important;
+    margin-bottom: 0!important;
+}
