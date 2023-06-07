@@ -50,6 +50,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="error-area" style="color: red;"></div>
                     <form method="post">
                         <div class="row mb-3">
                             <div class="col-lg-6">
@@ -74,7 +75,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary btnCloseCr" data-bs-dismiss="modal">Close
+                    </button>
                     <button type="button" id="btnCreate" class="btn btn-outline-primary">Save changes</button>
                 </div>
             </div>
@@ -109,6 +111,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="error-area" style="color: red;"></div>
                     <form method="post">
                         <div class="row mb-3">
                             <div class="col-lg-6">
@@ -164,6 +167,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="error-area" style="color: red;"></div>
                     <form method="post">
                         <div class="row mb-3">
                             <div class="col-lg-6">
@@ -198,7 +202,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary " data-bs-dismiss="modal">Close</button>
                     <button type="button" id="btnWithdraw" class="btn btn-outline-primary">
                         <i class="fas fa-exchange-alt"></i>
                         Deposit
@@ -219,6 +223,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="error-area" style="color: red;"></div>
                     <form method="post" autocomplete="off">
                         <div class="row mt-3">
                             <div class="mb-3 float-left col-lg-3 col-sm-12 col-md-6">
@@ -281,6 +286,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="error-area" style="color: red;"></div>
                     <form method="post">
                         <div class="row mb-3">
                             <div class="col-lg-6">
@@ -409,7 +415,6 @@
     </div>
 
 
-
 </div>
 <script src="/assets/jquery/jquery-3.6.4.min.js"></script>
 <script src="/assets/js/bootstrap/bootstrap.bundle.min.js"></script>
@@ -499,9 +504,6 @@
                 addEventTransfer();
                 // addEventHistoryDeposit();
             })
-            .fail((error) => {
-                console.error(error);
-            })
     }
 
     getAllCustomers();
@@ -520,9 +522,6 @@
                 $('#tbHistoryDeposit tbody').append(str)
                 $('#mdHistoryDeposit').modal('show');
             })
-            .fail((error) => {
-                console.error(error);
-            })
     }
 
     function getAllWithdraw() {
@@ -538,9 +537,6 @@
                 $('#tbHistoryWithdraw tbody').empty(str)
                 $('#tbHistoryWithdraw tbody').append(str)
                 $('#mdHistoryWithdraw').modal('show');
-            })
-            .fail((error) => {
-                console.error(error);
             })
     }
 
@@ -558,9 +554,7 @@
                 $('#tbHistoryTransfer tbody').append(str)
                 $('#mdHistoryTransfer').modal('show');
             })
-            .fail((error) => {
-                console.error(error);
-            })
+
     }
 
 
@@ -581,7 +575,7 @@
             success: function (customers) {
                 let recipientSelect = $('#recipientSelect');
                 recipientSelect.empty();
-                recipientSelect.append($('<option>').val('').text('Select recipient'));
+                // recipientSelect.append($('<option>').val('').text('Select recipient'));
 
                 $.each(customers, function (index, customer) {
                     if (customer.id !== customerId && customer.deleted === false) {
@@ -603,6 +597,13 @@
             $('#phoneCr').val();
             $('#addressCr').val();
             $('#mdCreate').modal('show');
+
+            $('#fullNameCr').val('');
+            $('#emailCr').val('');
+            $('#phoneCr').val('');
+            $('#addressCr').val('');
+            $('.error-area').empty();
+
         });
     }
 
@@ -610,7 +611,6 @@
         $('.deposit').on('click', function () {
             customerId = $(this).data('id');
             getCustomerById(customerId).then((data) => {
-                console.log(data);
 
                 if (data !== {}) {
                     $('#fullNameDepo').val(data.fullName);
@@ -619,13 +619,13 @@
                     $('#addressDepo').val(data.address);
                     $('#amountDepo').val(data.balance);
                     $('#mdDeposit').modal('show');
+
+                    $('#transactionAmountDepo').val('');
+                    $('.error-area').empty();
                 } else {
                     alert('Customer not found');
                 }
             })
-                .catch((error) => {
-                    console.log(error);
-                });
         })
     }
 
@@ -633,7 +633,6 @@
         $('.withdraw').on('click', function () {
             customerId = $(this).data('id');
             getCustomerById(customerId).then((data) => {
-                console.log(data);
 
                 if (data !== {}) {
                     $('#fullNameWd').val(data.fullName);
@@ -642,13 +641,13 @@
                     $('#addressWd').val(data.address);
                     $('#amountWd').val(data.balance);
                     $('#mdWithdraw').modal('show');
+
+                    $('#transactionAmountWd').val('');
+                    $('.error-area').empty();
                 } else {
                     alert('Customer not found');
                 }
             })
-                .catch((error) => {
-                    console.log(error);
-                });
         })
     }
 
@@ -657,7 +656,6 @@
         $('.transfer').on('click', function () {
             customerId = $(this).data('id');
             getCustomerById(customerId).then((data) => {
-                console.log(data);
 
                 if (data !== {}) {
                     $('#senderIdTf').val(data.id);
@@ -666,22 +664,17 @@
                     $('#balanceTf').val(data.balance);
                     getRecipients(customerId);
                     $('#mdTransfer').modal('show');
+
+                    $('#transfer').val('');
+                    $('#total').val('');
+                    $('.error-area').empty();
+
                 } else {
                     alert('Customer not found');
                 }
             })
-                .catch((error) => {
-                    console.log(error);
-                });
         })
     }
-
-    // function addEventHistoryDeposit() {
-    //     $('#btnHistoryDeposit').on('click', function () {
-    //         getAllDeposit();
-    //         // $('#mdHistoryDeposit').modal('show');
-    //     });
-    // }
 
 
     function addEventEdit() {
@@ -696,13 +689,13 @@
                     $('#phoneUp').val(data.phone);
                     $('#addressUp').val(data.address);
                     $('#mdUpdate').modal('show');
+
+                    $('.error-area').empty();
+
                 } else {
                     alert('Customer not found');
                 }
             })
-                .catch((error) => {
-                    console.log(error);
-                });
         })
     }
 
@@ -773,31 +766,33 @@
             .done((data) => {
                 customer = data;
                 tbody.append(renderCustomer(customer))
-                // console.log(data)
-                // document.getElementById('fullNameCr').innerHeight = '';
-                // document.getElementById('emailCr').innerHeight = '';
-                // document.getElementById('phoneCr').innerHeight = '';
-                // document.getElementById('addressCr').innerHeight = '';
+                $('#mdCreate').modal('hide');
+
                 $('#fullNameCr').val('');
                 $('#emailCr').val('');
                 $('#phoneCr').val('');
                 $('#addressCr').val('');
-                $('#mdCreate').modal('hide');
+                $('.error-area').empty();
 
-                // addEventCreate();
                 addEventEdit();
                 addEventDelete();
                 addEventDeposit();
                 addEventWithdraw();
                 addEventTransfer();
             })
-            .fail((errors) => {
-
+            .fail((jqXHR) => {
+                const responseJSON = jqXHR.responseJSON
+                let str = '<ul>'
+                $.each(responseJSON, (k, v) => {
+                    str += `<li>${v}</li>`
+                })
+                str += '</ul>'
+                $('.error-area').empty().append(str);
             })
-
-        // //chặn sự kiện mặc định của thẻ
-        // event.preventDefault();
     });
+
+
+
 
     $('#btnDeposit').on('click', () => {
         getCustomerById(customerId).then((data) => {
@@ -823,10 +818,12 @@
                 .done((data) => {
                     let str = renderCustomer(data.customer);
                     $('#tr_' + data.customer.id).replaceWith(str);
-                    $('#transactionAmountDepo').val('');
+
                     $('#mdDeposit').modal('hide');
 
-                    // addEventCreate();
+                    $('#transactionAmountDepo').val('');
+                    $('.error-area').empty();
+
                     addEventEdit();
                     addEventDelete();
                     addEventDeposit();
@@ -834,15 +831,15 @@
                     addEventTransfer();
 
                 })
-            // $.ajax({
-            //     type: 'POST',
-            //     headers: {
-            //         'accept': 'application/json',
-            //         'content-type': 'application/json'
-            //     },
-            //     url: 'http://localhost:8090/api/customers/deposits',
-            //     data: JSON.stringify(deposit)
-            // })
+                .fail((jqXHR) => {
+                    const responseJSON = jqXHR.responseJSON
+                    let str = '<ul>'
+                    $.each(responseJSON, (k, v) => {
+                        str += `<li>${v}</li>`
+                    })
+                    str += '</ul>'
+                    $('.error-area').empty().append(str);
+                })
         })
     });
 
@@ -872,9 +869,11 @@
                 .done((data) => {
                     let str = renderCustomer(data.customer);
                     $('#tr_' + data.customer.id).replaceWith(str);
-                    $('#transactionAmountWd').val('');
+
                     $('#mdWithdraw').modal('hide');
 
+                    $('#transactionAmountWd').val('');
+                    $('.error-area').empty();
                     // addEventCreate();
                     addEventEdit();
                     addEventDelete();
@@ -882,22 +881,22 @@
                     addEventWithdraw();
                     addEventTransfer();
                 })
-            // $.ajax({
-            //     type: 'POST',
-            //     headers: {
-            //         'accept': 'application/json',
-            //         'content-type': 'application/json'
-            //     },
-            //     url: 'http://localhost:3300/withdraws',
-            //     data: JSON.stringify(withdraw)
-            // })
-
+                .fail((jqXHR) => {
+                    const responseJSON = jqXHR.responseJSON
+                    let str = '<ul>'
+                    $.each(responseJSON, (k, v) => {
+                        str += `<li>${v}</li>`
+                    })
+                    str += '</ul>'
+                    $('.error-area').empty().append(str);
+                })
         })
     });
 
     $('#btnTransfer').on('click', () => {
 
         let recipientId = $('#recipientSelect').val();
+
         getCustomerById(customerId).then((data) => {
             let sender = data;
             let currentBalance = sender.balance;
@@ -931,21 +930,34 @@
                     },
                     url: 'http://localhost:8090/api/customers/transfers/' + sender.id,
                     data: JSON.stringify(transfer)
-                }).done((data) => {
-                    let strSender = renderCustomer(data.sender);
-                    $('#tr_' + data.sender.id).replaceWith(strSender);
-                    let strRecipient = renderCustomer(data.recipient);
-                    $('#tr_' + data.recipient.id).replaceWith(strRecipient);
-                    $('#transfer').val('');
-                    $('#total').val('');
-                    $('#mdTransfer').modal('hide');
-                    // addEventCreate();
-                    addEventEdit();
-                    addEventDelete();
-                    addEventDeposit();
-                    addEventWithdraw();
-                    addEventTransfer();
                 })
+                    .done((data) => {
+                        let strSender = renderCustomer(data.sender);
+                        $('#tr_' + data.sender.id).replaceWith(strSender);
+                        let strRecipient = renderCustomer(data.recipient);
+                        $('#tr_' + data.recipient.id).replaceWith(strRecipient);
+
+                        $('#mdTransfer').modal('hide');
+
+                        $('#transfer').val('');
+                        $('#total').val('');
+                        $('.error-area').empty();
+
+                        addEventEdit();
+                        addEventDelete();
+                        addEventDeposit();
+                        addEventWithdraw();
+                        addEventTransfer();
+                    })
+                    .fail((jqXHR) => {
+                        const responseJSON = jqXHR.responseJSON
+                        let str = '<ul>'
+                        $.each(responseJSON, (k, v) => {
+                            str += `<li>${v}</li>`
+                        })
+                        str += '</ul>'
+                        $('.error-area').empty().append(str);
+                    })
             })
         })
     });
@@ -974,7 +986,9 @@
         })
             .done((data) => {
                 customer = data;
+
                 $('#mdUpdate').modal('hide');
+                $('.error-area').empty();
                 console.log(data)
                 $('#tr_' + customerId).replaceWith(renderCustomer(customer));
 
@@ -984,6 +998,15 @@
                 addEventDeposit();
                 addEventWithdraw();
                 addEventTransfer();
+            })
+            .fail((jqXHR) => {
+                const responseJSON = jqXHR.responseJSON
+                let str = '<ul>'
+                $.each(responseJSON, (k, v) => {
+                    str += `<li>${v}</li>`
+                })
+                str += '</ul>'
+                $('.error-area').empty().append(str);
             })
     });
 
@@ -1005,8 +1028,6 @@
         let transactionFee = transferAmount * fee / 100;
         document.getElementById("total").value = Math.round(transactionFee + transferAmount);
     })
-
-    
 
 
 </script>

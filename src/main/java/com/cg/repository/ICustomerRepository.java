@@ -16,4 +16,8 @@ public interface ICustomerRepository extends JpaRepository<Customer, Long> {
     List<Customer> findAllByEmailLike(String email);
     Boolean existsByEmail(String email);
     boolean existsByEmailAndIdIsNot(String email, Long id);
+    Boolean existsByPhone(String phone);
+    boolean existsByPhoneAndIdIsNot(String phone, Long id);
+
+    boolean existsById(Long id);
 }

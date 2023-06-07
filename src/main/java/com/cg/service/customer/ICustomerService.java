@@ -18,6 +18,8 @@ public interface ICustomerService extends IGeneralService<Customer, Long> {
 
     Boolean existsByEmail(String email);
     boolean existsByEmailAndIdIsNot(String email, Long id);
+    Boolean existsByPhone(String phone);
+    boolean existsByPhoneAndIdIsNot(String phone, Long id);
 
     Customer save(Customer customer);
 

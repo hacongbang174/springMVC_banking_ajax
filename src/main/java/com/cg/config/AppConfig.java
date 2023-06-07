@@ -1,5 +1,6 @@
 package com.cg.config;
 
+import com.sun.istack.NotNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
+//import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -26,6 +28,7 @@ import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -37,12 +40,13 @@ import java.util.Properties;
 @EnableJpaRepositories("com.cg.repository")
 @ComponentScan("com.cg")
 @EnableSpringDataWebSupport
-public class AppConfig implements WebMvcConfigurer,  ApplicationContextAware {
+public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
+
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NotNull ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
@@ -51,7 +55,8 @@ public class AppConfig implements WebMvcConfigurer,  ApplicationContextAware {
 //        return new CustomerServiceImpl();
 //    }
 
-    //Cấu hình Thymeleaf
+
+    // Thymeleaf Configuration
     @Bean
     public SpringResourceTemplateResolver templateResolver() {
         SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
@@ -78,7 +83,7 @@ public class AppConfig implements WebMvcConfigurer,  ApplicationContextAware {
         return viewResolver;
     }
 
-    //Cấu hình JPA
+    // JPA Configuration
     @Bean
     @Qualifier(value = "entityManager")
     public EntityManager entityManager(EntityManagerFactory entityManagerFactory) {
@@ -101,7 +106,7 @@ public class AppConfig implements WebMvcConfigurer,  ApplicationContextAware {
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-            dataSource.setUrl("jdbc:mysql://localhost:3306/springMVC_banking_ajax");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/springmvc_banking_ajax?characterEncoding=UTF-8");
         dataSource.setUsername("root");
         dataSource.setPassword("Anhvanmo.123");
         return dataSource;
@@ -114,11 +119,13 @@ public class AppConfig implements WebMvcConfigurer,  ApplicationContextAware {
         return transactionManager;
     }
 
-    public Properties additionalProperties() {
+    Properties additionalProperties() {
         Properties properties = new Properties();
-        properties.setProperty("hibernate.hbm2ddl.auto", "update");
+        properties.setProperty("hibernate.connection.useUnicode", "true");
+        properties.setProperty("hibernate.connection.charset", "UTF-8");
         properties.setProperty("hibernate.show_sql", "true");
         properties.setProperty("hibernate.format_sql", "true");
+        properties.setProperty("hibernate.hbm2ddl.auto", "update");
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
         return properties;
     }
@@ -135,4 +142,5 @@ public class AppConfig implements WebMvcConfigurer,  ApplicationContextAware {
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
     }
+
 }
