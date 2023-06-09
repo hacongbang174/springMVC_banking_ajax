@@ -4,6 +4,8 @@ package com.cg.service.customer;
 import com.cg.model.Customer;
 import com.cg.repository.ICustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -32,6 +34,11 @@ public class CustomerService implements ICustomerService {
     @Override
     public List<Customer> findAllByEmailLike(String email) {
         return customerRepository.findAllByEmailLike(email);
+    }
+
+    @Override
+    public Page<Customer> findAll(Pageable pageable) {
+        return customerRepository.findAll(pageable);
     }
 
     @Override

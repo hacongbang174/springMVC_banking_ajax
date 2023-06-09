@@ -6,6 +6,7 @@ import com.cg.model.Customer;
 import com.cg.model.Deposit;
 import com.cg.model.Transfer;
 import com.cg.model.Withdraw;
+import com.cg.model.dto.*;
 import com.cg.service.customer.ICustomerService;
 import com.cg.service.deposit.IDepositService;
 import com.cg.service.transfer.ITransferService;
@@ -20,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,54 +41,71 @@ public class CustomerAPI {
     @Autowired
     private ValidateUtils validateUtils;
 
-    @GetMapping
-    public ResponseEntity<List<Customer>> getAllCustomers() {
-        List<Customer> customers = customerService.findAll();
 
-        return new ResponseEntity<>(customers, HttpStatus.OK);
+
+    @GetMapping
+    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
+        List<Customer> customers = customerService.findAll();
+        List<CustomerDTO> customerDTOS = new ArrayList<>();
+        for (Customer customer : customers) {
+            customerDTOS.add(customer.toCustomerDTO());
+        }
+        return new ResponseEntity<>(customerDTOS, HttpStatus.OK);
+    }
+
+    @GetMapping("/{customerId}")
+    public ResponseEntity<?> findById(@PathVariable String customerId) {
+        if (!validateUtils.isNumberValid(customerId)) {
+            throw new DataInputException("Mã khách hàng không hợp lệ");
+        }
+        Long id = Long.parseLong(customerId);
+
+        Optional<Customer> customerOptional = customerService.findById(id);
+
+        if (!customerOptional.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        CustomerDTO customerDTO = customerOptional.get().toCustomerDTO();
+
+        return new ResponseEntity<>(customerDTO, HttpStatus.OK);
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createCustomer(@RequestBody Customer customer, BindingResult bindingResult) {
+    public ResponseEntity<?> createCustomer(@RequestBody CustomerCreateReqDTO customerCreateReqDTO, BindingResult bindingResult) {
 
-        new Customer().validate(customer, bindingResult);
+        new CustomerCreateReqDTO().validate(customerCreateReqDTO, bindingResult);
 
         if (bindingResult.hasFieldErrors()) {
             return appUtils.mapErrorToResponse(bindingResult);
         }
 
-        Boolean existEmail = customerService.existsByEmail(customer.getEmail());
+        Boolean existEmail = customerService.existsByEmail(customerCreateReqDTO.getEmail());
 
         if (existEmail) {
             throw new EmailExistsException("Email đã tồn tại");
         }
 
-        Boolean existsPhone = customerService.existsByPhone(customer.getPhone());
+        Boolean existsPhone = customerService.existsByPhone(customerCreateReqDTO.getPhone());
 
         if (existsPhone) {
             throw new EmailExistsException("Phone đã tồn tại");
         }
-
+        Customer customer = customerCreateReqDTO.toCustomer(null, BigDecimal.ZERO);
         customerService.save(customer);
 
-        return new ResponseEntity<>(customer, HttpStatus.CREATED);
-    }
 
-    @GetMapping("/{customerId}")
-    public ResponseEntity<?> getById(@PathVariable Long customerId) {
-        Optional<Customer> customerOptional = customerService.findById(customerId);
-        Customer customer = customerOptional.get();
-
-        return new ResponseEntity<>(customer, HttpStatus.OK);
+        return new ResponseEntity<>(customer.toCustomerCreateResDTO(), HttpStatus.CREATED);
     }
 
     @PatchMapping("/edit/{customerId}")
-    public ResponseEntity<?> editCustomer(@PathVariable String customerId, @Validated @RequestBody Customer customer, BindingResult bindingResult) {
+    public ResponseEntity<?> update(@PathVariable String customerId, @Validated @RequestBody CustomerUpdateReqDTO customerUpdateReqDTO, BindingResult bindingResult) {
+
         if (!validateUtils.isNumberValid(customerId)) {
             throw new DataInputException("Mã khách hàng không hợp lệ");
         }
 
-        new Customer().validate(customer, bindingResult);
+        new CustomerCreateReqDTO().validate(customerUpdateReqDTO, bindingResult);
 
         if (bindingResult.hasFieldErrors()) {
             return appUtils.mapErrorToResponse(bindingResult);
@@ -100,22 +119,22 @@ public class CustomerAPI {
             throw new DataInputException("Mã khách hàng không tồn tại");
         }
 
-        Boolean existEmail = customerService.existsByEmailAndIdIsNot(customer.getEmail(), id);
+        Boolean existEmail = customerService.existsByEmailAndIdIsNot(customerUpdateReqDTO.getEmail(), id);
 
         if (existEmail) {
             throw new EmailExistsException("Email đã tồn tại");
         }
 
-        Customer updateCustomer = customerOptional.get();
+        Customer customer = customerUpdateReqDTO.toCustomer();
+        Customer customerUpdate = customerOptional.get();
 
-        updateCustomer.setFullName(customer.getFullName());
-        updateCustomer.setEmail(customer.getEmail());
-        updateCustomer.setPhone(customer.getPhone());
-        updateCustomer.setAddress(customer.getAddress());
+        customer.setId(customerUpdate.getId());
+        customer.setBalance(customerOptional.get().getBalance());
 
-        customerService.save(updateCustomer);
+        customerService.save(customer);
 
-        return new ResponseEntity<>(updateCustomer, HttpStatus.OK);
+
+        return new ResponseEntity<>(customer.toCustomerUpdateResDTO(), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{customerId}")
@@ -135,12 +154,12 @@ public class CustomerAPI {
     }
 
     @PatchMapping("/deposits/{customerId}")
-    public ResponseEntity<?> deposit(@PathVariable String customerId, @RequestBody Deposit deposit,  BindingResult bindingResult) {
+    public ResponseEntity<?> deposit(@PathVariable String customerId, @RequestBody DepositReqDTO depositReqDTO,  BindingResult bindingResult) {
 
         if (!validateUtils.isNumberValid(customerId)) {
             throw new DataInputException("Mã khách hàng nộp tiền không hợp lệ");
         }
-        new Deposit().validate(deposit, bindingResult);
+        new DepositReqDTO().validate(depositReqDTO, bindingResult);
 
         if (bindingResult.hasFieldErrors()) {
             return appUtils.mapErrorToResponse(bindingResult);
@@ -152,17 +171,20 @@ public class CustomerAPI {
         if (!customerOptional.isPresent()) {
             throw new DataInputException("Mã khách hàng nộp tiền không tồn tại");
         }
+        Customer customer = customerOptional.get();
+        CustomerDTO customerDTO = customer.toCustomerDTO();
 
-        if(deposit.getCustomer().getBalance().toString().length() > 12) {
+        BigDecimal newBalance = customer.getBalance().add(depositReqDTO.getTransactionAmount());
+
+        if(newBalance.toString().length() > 12) {
             throw new DataInputException("Vượt quá định mức cho phép. Tổng tiền gửi nhỏ hơn 13 số");
         }
 
-        Customer customer = customerOptional.get();
+        customerDTO.setBalance(newBalance);
 
-        customer.setBalance(deposit.getCustomer().getBalance());
+        Deposit deposit = depositReqDTO.toDeposit(null, customerDTO);
 
-        customerService.save(customer);
-
+        customerService.save(customerDTO.toCustomer());
         depositService.save(deposit);
         return new ResponseEntity<>(deposit, HttpStatus.OK);
     }
@@ -174,12 +196,12 @@ public class CustomerAPI {
     }
 
     @PatchMapping("/withdraws/{customerId}")
-    public ResponseEntity<?> withdraw(@PathVariable String customerId, @RequestBody Withdraw withdraw, BindingResult bindingResult) {
+    public ResponseEntity<?> withdraw(@PathVariable String customerId, @RequestBody WithdrawReqDTO withdrawReqDTO, BindingResult bindingResult) {
 
         if (!validateUtils.isNumberValid(customerId)) {
             throw new DataInputException("Mã khách hàng rút tiền không hợp lệ");
         }
-        new Withdraw().validate(withdraw, bindingResult);
+        new WithdrawReqDTO().validate(withdrawReqDTO, bindingResult);
 
         if (bindingResult.hasFieldErrors()) {
             return appUtils.mapErrorToResponse(bindingResult);
@@ -191,16 +213,20 @@ public class CustomerAPI {
         if (!customerOptional.isPresent()) {
             throw new DataInputException("Mã khách hàng rút tiền không tồn tại");
         }
+        Customer customer = customerOptional.get();
+        CustomerDTO customerDTO = customer.toCustomerDTO();
 
-        if(withdraw.getCustomer().getBalance().compareTo(BigDecimal.ZERO) < 0) {
+        BigDecimal newBalance = customer.getBalance().subtract(withdrawReqDTO.getTransactionAmount());
+
+        if(newBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new DataInputException("Số dư hiện tại không đủ");
         }
 
-        Customer customer = customerOptional.get();
+        customerDTO.setBalance(newBalance);
 
-        customer.setBalance(withdraw.getCustomer().getBalance());
+        Withdraw withdraw = withdrawReqDTO.toWithdraw(null, customerDTO);
 
-        customerService.save(customer);
+        customerService.save(customerDTO.toCustomer());
         withdrawService.save(withdraw);
         return new ResponseEntity<>(withdraw, HttpStatus.OK);
     }
@@ -212,12 +238,12 @@ public class CustomerAPI {
     }
 
     @PatchMapping("/transfers/{customerId}")
-    public ResponseEntity<?> transfer(@PathVariable String customerId, @RequestBody Transfer transfer, BindingResult bindingResult) {
+    public ResponseEntity<?> transfer(@PathVariable String customerId, @RequestBody TransferReqDTO transferReqDTO, BindingResult bindingResult) {
 
         if (!validateUtils.isNumberValid(customerId)) {
             throw new DataInputException("Mã khách chuyển tiền hàng không hợp lệ");
         }
-        new Transfer().validate(transfer, bindingResult);
+        new TransferReqDTO().validate(transferReqDTO, bindingResult);
 
         if (bindingResult.hasFieldErrors()) {
             return appUtils.mapErrorToResponse(bindingResult);
@@ -230,32 +256,37 @@ public class CustomerAPI {
             throw new DataInputException("Mã khách hàng chuyển tiền không tồn tại");
         }
 
-        if (!validateUtils.isNumberValid(transfer.getRecipient().getId().toString())) {
+        if (!validateUtils.isNumberValid(transferReqDTO.getRecipientId().toString())) {
             throw new DataInputException("Mã khách nhận tiền hàng không hợp lệ");
         }
 
-        Optional<Customer> customerOptionalRecipient = customerService.findById(transfer.getRecipient().getId());
+        Optional<Customer> customerOptionalRecipient = customerService.findById(transferReqDTO.getRecipientId());
 
         if (!customerOptionalRecipient.isPresent()) {
             throw new DataInputException("Mã khách hàng nhận tiền không tồn tại");
         }
 
         Customer sender = customerOptionalSender.get();
+        CustomerDTO senderDTO = sender.toCustomerDTO();
         Customer recipient = customerOptionalRecipient.get();
+        CustomerDTO recipientDTO = recipient.toCustomerDTO();
 
-        if(transfer.getSender().getBalance().compareTo(BigDecimal.ZERO) < 0) {
+        BigDecimal newBalanceSender = sender.getBalance().subtract(transferReqDTO.getTransactionAmount());
+        BigDecimal newBalanceRecipient = recipient.getBalance().add(transferReqDTO.getTransferAmount());
+
+        if(newBalanceSender.compareTo(BigDecimal.ZERO) < 0) {
             throw new DataInputException("Số dư hiện tại không đủ để gửi");
         }
 
-        if(transfer.getRecipient().getBalance().toString().length() > 12) {
+        if(newBalanceRecipient.toString().length() > 12) {
             throw new DataInputException("Vượt quá định mức cho phép của người nhận. Tổng định mức nhỏ hơn 13 số");
         }
 
-        sender.setBalance(transfer.getSender().getBalance());
-        recipient.setBalance(transfer.getRecipient().getBalance());
-
-        customerService.save(sender);
-        customerService.save(recipient);
+        senderDTO.setBalance(newBalanceSender);
+        recipientDTO.setBalance(newBalanceRecipient);
+        Transfer transfer = transferReqDTO.toTransfer(null, senderDTO, recipientDTO);
+        customerService.save(senderDTO.toCustomer());
+        customerService.save(recipientDTO.toCustomer());
         transferService.save(transfer);
         return new ResponseEntity<>(transfer, HttpStatus.OK);
     }

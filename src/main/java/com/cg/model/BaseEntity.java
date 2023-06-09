@@ -72,4 +72,3 @@ public abstract class BaseEntity {
         this.updatedBy = updatedBy;
     }
 }
-

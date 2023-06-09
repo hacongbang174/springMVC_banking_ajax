@@ -1,0 +1,65 @@
+<th:block th:fragment="modal-transfer">
+
+  <div class="modal fade" id="mdTransfer" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+       data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal WithDraw</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="error-area" style="color: red;"></div>
+          <form method="post" autocomplete="off">
+            <div class="row mt-3">
+              <div class="mb-3 float-left col-lg-3 col-sm-12 col-md-6">
+                <label for="senderIdTf" class="form-label">Sender ID</label>
+                <input type="number" class="form-control" id="senderIdTf" readonly>
+              </div>
+              <div class="mb-3 float-left col-lg-3 col-sm-12 col-md-6">
+                <label for="senderNameTf" class="form-label">Sender Name</label>
+                <input type="text" class="form-control" id="senderNameTf" readonly>
+              </div>
+              <div class="mb-3 float-left col-lg-3 col-sm-12 col-md-6">
+                <label for="emailTf" class="form-label">Sender Email</label>
+                <input type="email" class="form-control" id="emailTf" readonly>
+              </div>
+              <div class="mb-3 float-left col-lg-3 col-sm-12 col-md-6">
+                <label for="balanceTf" class="form-label">Sender Balance</label>
+                <input type="number" class="form-control" id="balanceTf" readonly>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="mb-3 float-left col-lg-3 col-sm-12 col-md-6">
+                <label for="recipientSelect">Recipient</label>
+                <select class="form-select" name="recipient.id" id="recipientSelect">
+                  <option value="" selected disabled>Select recipient</option>
+                </select>
+              </div>
+              <div class="mb-3 float-left col-lg-3 col-sm-12 col-md-6">
+                <label for="transfer" class="form-label">Transfer Amount (VND)</label>
+                <input type="text" class="form-control" id="transfer" name="transfer" value="0">
+              </div>
+              <div class="mb-3 float-left col-lg-3 col-sm-12 col-md-6">
+                <label for="fees" class="form-label">Fee (%)</label>
+                <input type="number" class="form-control" id="fees" name="fees" value="10" readonly>
+              </div>
+              <div class="mb-3 float-left col-lg-3 col-sm-12 col-md-6">
+                <label for="total" class="form-label">Total Amount (VND)</label>
+                <input type="number" class="form-control" id="total" value="0" readonly>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" id="btnTransfer" class="btn btn-outline-warning">
+            <i class="fas fa-exchange-alt"></i>
+            Transfer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</th:block>
