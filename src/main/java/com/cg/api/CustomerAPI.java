@@ -7,10 +7,14 @@ import com.cg.model.Deposit;
 import com.cg.model.Transfer;
 import com.cg.model.Withdraw;
 import com.cg.model.dto.*;
+import com.cg.service.customer.CustomerService;
 import com.cg.service.customer.ICustomerService;
+import com.cg.service.deposit.DepositService;
 import com.cg.service.deposit.IDepositService;
 import com.cg.service.transfer.ITransferService;
+import com.cg.service.transfer.TransferService;
 import com.cg.service.withdraw.IWithdrawService;
+import com.cg.service.withdraw.WithdrawService;
 import com.cg.utils.AppUtils;
 import com.cg.utils.ValidateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +34,19 @@ import java.util.Optional;
 public class CustomerAPI {
     @Autowired
     private ICustomerService customerService;
+
     @Autowired
     private IDepositService depositService;
+
     @Autowired
     private IWithdrawService withdrawService;
+
     @Autowired
     private ITransferService transferService;
+
     @Autowired
     private AppUtils appUtils;
+
     @Autowired
     private ValidateUtils validateUtils;
 
@@ -92,10 +101,11 @@ public class CustomerAPI {
             throw new EmailExistsException("Phone đã tồn tại");
         }
         Customer customer = customerCreateReqDTO.toCustomer(null, BigDecimal.ZERO);
+
         customerService.save(customer);
+        CustomerCreateResDTO customerCreateResDTO = customer.toCustomerCreateResDTO();
 
-
-        return new ResponseEntity<>(customer.toCustomerCreateResDTO(), HttpStatus.CREATED);
+        return new ResponseEntity<>(customerCreateResDTO, HttpStatus.CREATED);
     }
 
     @PatchMapping("/edit/{customerId}")
@@ -105,7 +115,7 @@ public class CustomerAPI {
             throw new DataInputException("Mã khách hàng không hợp lệ");
         }
 
-        new CustomerCreateReqDTO().validate(customerUpdateReqDTO, bindingResult);
+        new CustomerUpdateReqDTO().validate(customerUpdateReqDTO, bindingResult);
 
         if (bindingResult.hasFieldErrors()) {
             return appUtils.mapErrorToResponse(bindingResult);
@@ -148,9 +158,13 @@ public class CustomerAPI {
 
 
     @GetMapping("/historyDeposits")
-    public ResponseEntity<List<Deposit>> getAllDeposits() {
+    public ResponseEntity<List<DepositDTO>> getAllDeposits() {
         List<Deposit> deposits = depositService.findAll();
-        return new ResponseEntity<>(deposits, HttpStatus.OK);
+        List<DepositDTO> depositDTOS = new ArrayList<>();
+        for (Deposit deposit : deposits) {
+            depositDTOS.add(deposit.toDepositDTO());
+        }
+        return new ResponseEntity<>(depositDTOS, HttpStatus.OK);
     }
 
     @PatchMapping("/deposits/{customerId}")
@@ -181,18 +195,23 @@ public class CustomerAPI {
         }
 
         customerDTO.setBalance(newBalance);
+        Customer newCustomer = customerDTO.toCustomer();
+        customerService.save(newCustomer);
 
         Deposit deposit = depositReqDTO.toDeposit(null, customerDTO);
-
-        customerService.save(customerDTO.toCustomer());
         depositService.save(deposit);
+
         return new ResponseEntity<>(deposit, HttpStatus.OK);
     }
 
     @GetMapping("/historyWithdraws")
-    public ResponseEntity<List<Withdraw>> getAllWithdraw() {
+    public ResponseEntity<List<WithdrawDTO>> getAllWithdraw() {
         List<Withdraw> withdraws = withdrawService.findAll();
-        return new ResponseEntity<>(withdraws, HttpStatus.OK);
+        List<WithdrawDTO> withdrawDTOS = new ArrayList<>();
+        for (Withdraw withdraw : withdraws) {
+            withdrawDTOS.add(withdraw.toWithdrawDTO());
+        }
+        return new ResponseEntity<>(withdrawDTOS, HttpStatus.OK);
     }
 
     @PatchMapping("/withdraws/{customerId}")
@@ -223,18 +242,22 @@ public class CustomerAPI {
         }
 
         customerDTO.setBalance(newBalance);
+        Customer newCustomer = customerDTO.toCustomer();
+        customerService.save(newCustomer);
 
         Withdraw withdraw = withdrawReqDTO.toWithdraw(null, customerDTO);
-
-        customerService.save(customerDTO.toCustomer());
         withdrawService.save(withdraw);
         return new ResponseEntity<>(withdraw, HttpStatus.OK);
     }
 
     @GetMapping("/historyTransfers")
-    public ResponseEntity<List<Transfer>> getAllTransfers() {
+    public ResponseEntity<List<TransferDTO>> getAllTransfers() {
         List<Transfer> transfers = transferService.findAll();
-        return new ResponseEntity<>(transfers, HttpStatus.OK);
+        List<TransferDTO> transferDTOS = new ArrayList<>();
+        for (Transfer transfer : transfers) {
+            transferDTOS.add(transfer.toTransferDTO());
+        }
+        return new ResponseEntity<>(transferDTOS, HttpStatus.OK);
     }
 
     @PatchMapping("/transfers/{customerId}")
@@ -283,11 +306,16 @@ public class CustomerAPI {
         }
 
         senderDTO.setBalance(newBalanceSender);
+        Customer newSender = senderDTO.toCustomer();
+        customerService.save(newSender);
+
         recipientDTO.setBalance(newBalanceRecipient);
+        Customer newRecipient = recipientDTO.toCustomer();
+        customerService.save(newRecipient);
+
         Transfer transfer = transferReqDTO.toTransfer(null, senderDTO, recipientDTO);
-        customerService.save(senderDTO.toCustomer());
-        customerService.save(recipientDTO.toCustomer());
         transferService.save(transfer);
-        return new ResponseEntity<>(transfer, HttpStatus.OK);
+
+        return new ResponseEntity<>(transfer.toTransferDTO(), HttpStatus.OK);
     }
 }

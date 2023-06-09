@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Getter
 @Setter
+@Accessors(chain = true)
 public class CustomerCreateReqDTO implements Validator {
 
     private String fullName;
@@ -23,15 +24,13 @@ public class CustomerCreateReqDTO implements Validator {
     private String address;
 
     public Customer toCustomer(Long id, BigDecimal balance) {
-        Customer customer = new Customer();
-        customer.setId(id);
-        customer.setFullName(fullName);
-        customer.setEmail(email);
-        customer.setPhone(phone);
-        customer.setBalance(balance);
-        customer.setAddress(address);
-
-        return customer;
+        return new Customer()
+                .setId(id)
+                .setFullName(fullName)
+                .setEmail(email)
+                .setPhone(phone)
+                .setAddress(address)
+                .setBalance(balance);
     }
     @Override
     public boolean supports(Class<?> clazz) {
@@ -39,6 +38,7 @@ public class CustomerCreateReqDTO implements Validator {
     }
     @Override
     public void validate(Object target, Errors errors) {
+
         CustomerCreateReqDTO customerCreateReqDTO = (CustomerCreateReqDTO) target;
 
         String fullName = customerCreateReqDTO.fullName;

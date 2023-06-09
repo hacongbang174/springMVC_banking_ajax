@@ -29,10 +29,10 @@ page.elements.tblTransferBody = $('#tbHistoryTransfer tbody')
 
 page.dialogs.elements.modalCreate = $('#mdCreate')
 page.dialogs.elements.errorCreateArea = $('#mdCreate .error-area')
-page.dialogs.elements.fullNameCre = $('#fullNameCre')
-page.dialogs.elements.emailCre = $('#emailCre')
-page.dialogs.elements.phoneCre = $('#phoneCre')
-page.dialogs.elements.addressCre = $('#addressCre')
+page.dialogs.elements.fullNameCre = $('#fullNameCr')
+page.dialogs.elements.emailCre = $('#emailCr')
+page.dialogs.elements.phoneCre = $('#phoneCr')
+page.dialogs.elements.addressCre = $('#addressCr')
 page.dialogs.elements.btnCreate = $('#btnCreate')
 
 page.dialogs.elements.modalUpdate = $('#mdUpdate')
@@ -119,28 +119,28 @@ page.commands.renderCustomer = (obj) => {
 page.commands.renderDeposit = (obj) => {
     return `<tr id='trDP_${obj.id}'>
             <td>${obj.id}</td>
-            <td>${obj.customer.id}</td>
-            <td>${obj.customer.fullName}</td>
+            <td>${obj.customerDTO.id}</td>
+            <td>${obj.customerDTO.fullName}</td>
             <td>${obj.transactionAmount}</td>
         </tr>`
         ;
 }
 
 page.commands.renderWithdraw = (obj) => {
-    return `<tr id='trDP_${obj.id}'>
+    return `<tr id='trWD_${obj.id}'>
             <td>${obj.id}</td>
-            <td>${obj.customer.id}</td>
-            <td>${obj.customer.fullName}</td>
+            <td>${obj.customerDTO.id}</td>
+            <td>${obj.customerDTO.fullName}</td>
             <td>${obj.transactionAmount}</td>
         </tr>`
         ;
 }
 
 page.commands.renderTransfer = (obj) => {
-    return `<tr id='trDP_${obj.id}'>
+    return `<tr id='trTF_${obj.id}'>
             <td>${obj.id}</td>
-            <td>${obj.sender.id}</td>
-            <td>${obj.recipient.id}</td>
+            <td>${obj.senderDTO.id}</td>
+            <td>${obj.recipientDTO.id}</td>
             <td>${obj.fees}</td>
             <td>${obj.feesAmount}</td>
             <td>${obj.transferAmount}</td>
@@ -401,7 +401,7 @@ page.dialogs.commands.doDelete = (customerId) => {
         })
 }
 
-page.dialogs.elements.handleCreate = () => {
+    page.dialogs.commands.handleCreate = () => {
     let fullName = page.dialogs.elements.fullNameCre.val();
     let email = page.dialogs.elements.emailCre.val();
     let phone = page.dialogs.elements.phoneCre.val();
@@ -428,8 +428,7 @@ page.dialogs.commands.doCreate = (customer) => {
         data: JSON.stringify(customer)
     })
         .done((data) => {
-            customer = data;
-            let str = page.commands.renderCustomer(customer);
+            let str = page.commands.renderCustomer(data);
             page.elements.tblCustomerBody.append(str);
             page.dialogs.elements.modalCreate.modal('hide');
 
@@ -577,10 +576,10 @@ page.dialogs.commands.doTransfer = (transfer) => {
         data: JSON.stringify(transfer)
     })
         .done((data) => {
-            let strSender = renderCustomer(data.sender);
-            $('#tr_' + data.sender.id).replaceWith(strSender);
-            let strRecipient = page.commands.renderCustomer(data.recipient);
-            $('#tr_' + data.recipient.id).replaceWith(strRecipient);
+            let strSender = page.commands.renderCustomer(data.senderDTO);
+            $('#tr_' + data.senderDTO.id).replaceWith(strSender);
+            let strRecipient = page.commands.renderCustomer(data.recipientDTO);
+            $('#tr_' + data.recipientDTO.id).replaceWith(strRecipient);
 
             page.dialogs.elements.modalTransfer.modal('hide');
 
@@ -724,6 +723,25 @@ document.addEventListener("input", () => {
     let transactionAmount = Math.round(transactionFee + transferAmount);
     page.dialogs.elements.total.val(transactionAmount);
 })
+
+// document.addEventListener('DOMContentLoaded', function () {
+//     // Mong muốn của chúng ta
+//     Validator({
+//         form: '#form-create',
+//         formGroupSelector: '.form-group',
+//         errorSelector: '.form-message',
+//         rules: [
+//             Validator.isRequired('#fullNameCr', 'Vui lòng nhập tên đầy đủ của bạn'),
+//             Validator.isEmail('#emailCr'),
+//             Validator.isPhone('#phoneCr'),
+//             Validator.isRequired('#addressCr', 'Vui lòng nhập địa chỉ đầy đủ của bạn'),
+//         ],
+//         onSubmit: function (data) {
+//             // Call API
+//             console.log(data);
+//         }
+//     });
+// });
 
 
 

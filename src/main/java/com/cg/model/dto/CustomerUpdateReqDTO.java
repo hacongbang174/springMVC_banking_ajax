@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -13,6 +14,7 @@ import org.springframework.validation.Validator;
 @AllArgsConstructor
 @Getter
 @Setter
+@Accessors(chain = true)
 public class CustomerUpdateReqDTO implements Validator {
 
     private String fullName;

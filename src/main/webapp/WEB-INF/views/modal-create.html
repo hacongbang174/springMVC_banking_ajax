@@ -11,25 +11,29 @@
                 </div>
                 <div class="modal-body">
                     <div class="error-area" style="color: red;"></div>
-                    <form method="post">
+                    <form method="post" id="form-create">
                         <div class="row mb-3">
-                            <div class="col-lg-6">
-                                <label for="fullNameCr">Full Name</label>
+                            <div class="col-lg-6 form-group">
+                                <label for="fullNameCr" class="form-label">Full Name</label>
                                 <input type="text" id="fullNameCr" class="form-control">
+                                <div class="form-message"></div>
                             </div>
-                            <div class="col-lg-6">
-                                <label for="emailCr">Email</label>
+                            <div class="col-lg-6 form-group">
+                                <label for="emailCr" class="form-label">Email</label>
                                 <input type="email" id="emailCr" class="form-control">
+                                <div class="form-message"></div>
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-lg-6">
-                                <label for="phoneCr">Phone</label>
+                            <div class="col-lg-6 form-group">
+                                <label for="phoneCr" class="form-label">Phone</label>
                                 <input type="tel" id="phoneCr" class="form-control">
+                                <div class="form-message"></div>
                             </div>
-                            <div class="col-lg-6">
-                                <label for="addressCr">Address</label>
+                            <div class="col-lg-6 form-group">
+                                <label for="addressCr" class="form-label">Address</label>
                                 <input type="text" id="addressCr" class="form-control">
+                                <div class="form-message"></div>
                             </div>
                         </div>
                     </form>

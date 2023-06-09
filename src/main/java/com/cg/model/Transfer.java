@@ -1,6 +1,8 @@
 package com.cg.model;
 
 
+import com.cg.model.dto.TransferDTO;
+import com.cg.model.dto.WithdrawDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,7 +37,7 @@ public class Transfer extends BaseEntity {
     private BigDecimal transferAmount;
 
     @Column (nullable = false)
-    Long fees;
+    private Long fees;
 
     @Column(name = "fees_amount", precision = 10, scale = 0, nullable = false)
     private BigDecimal feesAmount;
@@ -43,5 +45,15 @@ public class Transfer extends BaseEntity {
     @Column(name = "transaction_amount", precision = 10, scale = 0, nullable = false)
     private BigDecimal transactionAmount;
 
-
+    public TransferDTO toTransferDTO() {
+        return new TransferDTO()
+                .setId(id)
+                .setSenderDTO(sender.toCustomerDTO())
+                .setRecipientDTO(recipient.toCustomerDTO())
+                .setFees(fees)
+                .setFeesAmount(feesAmount)
+                .setTransferAmount(transferAmount)
+                .setTransactionAmount(transactionAmount)
+                ;
+    }
 }
